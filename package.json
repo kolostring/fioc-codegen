@@ -21,7 +21,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm test --run"
+    "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm test --run",
+    "release": "pnpm run build && pnpm test --run && pnpm publish --access public"
   },
   "keywords": [
     "dependency-injection",

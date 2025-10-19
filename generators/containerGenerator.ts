@@ -59,19 +59,28 @@ export function generateContainers(
     for (const factory of factories) {
       const hasMetadata = factory.metadata && (factory.metadata.implements.length > 0 || factory.metadata.generics.length > 0);
       const returnToken = state.tokens.get(factory.returnType);
+      
+      // Determine registration method based on lifecycle
+      const registerMethod = factory.lifecycle === 'scoped' 
+        ? 'registerScopedFactory'
+        : factory.lifecycle === 'singleton'
+        ? 'registerSingletonFactory'
+        : 'registerFactory';
 
       if (hasMetadata || !returnToken) {
         // Register with factory token
         registrations.push(
-          `.registerFactory(Factories.${factory.name}Token, Factories.${factory.name}Factory)`
+          `.${registerMethod}(Factories.${factory.name}Token, Factories.${factory.name}Factory)`
         );
-        console.log(`    ✓ ${factory.name}Token ← ${factory.name}Factory`);
+        const lifecycleLabel = factory.lifecycle ? ` [@${factory.lifecycle.charAt(0).toUpperCase() + factory.lifecycle.slice(1)}]` : '';
+        console.log(`    ✓ ${factory.name}Token ← ${factory.name}Factory${lifecycleLabel}`);
       } else {
         // Register with return type token
         registrations.push(
-          `.registerFactory(Factories.Tokens.${returnToken}, Factories.${factory.name}Factory)`
+          `.${registerMethod}(Factories.Tokens.${returnToken}, Factories.${factory.name}Factory)`
         );
-        console.log(`    ✓ Tokens.${returnToken} ← ${factory.name}Factory`);
+        const lifecycleLabel = factory.lifecycle ? ` [@${factory.lifecycle.charAt(0).toUpperCase() + factory.lifecycle.slice(1)}]` : '';
+        console.log(`    ✓ Tokens.${returnToken} ← ${factory.name}Factory${lifecycleLabel}`);
       }
     }
 

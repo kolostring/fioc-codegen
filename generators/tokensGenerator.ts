@@ -14,20 +14,7 @@ export function generateTokens(
 ): void {
   console.log("\n🎫 PASS 3: Generating token declarations...");
 
-  // Add imports to tokens file
-  tokensFile.addImportDeclaration({
-    moduleSpecifier: DI_CORE,
-    namedImports: ["createDIToken"],
-  });
-
-  state.tokensImports.forEach((names, file) => {
-    tokensFile.addImportDeclaration({
-      moduleSpecifier: file,
-      namedImports: Array.from(names),
-    });
-  });
-
-  // Build dependency graph for tokens
+  // Build dependency graph for tokens FIRST (this will call ensureToken for generics)
   const tokenDeps = new Map<string, Set<string>>();
   const tokenMetadata = new Map<string, { implements: string[]; generics: string[] }>();
 
@@ -108,6 +95,40 @@ export function generateTokens(
       }
     }
   }
+
+  // Now add imports AFTER all ensureToken calls have been made
+  const coreImports = new Set(["createDIToken"]);
+  
+  // Check if DIContainer token exists - it needs to be imported from @fioc/core
+  // even though it's defined as a type alias in user code
+  if (state.tokens.has("DIContainer")) {
+    coreImports.add("DIContainer");
+    // Remove DIContainer from tokensImports if it was added there
+    state.tokensImports.forEach((names, file) => {
+      names.delete("DIContainer");
+    });
+  }
+  
+  tokensFile.addImportDeclaration({
+    moduleSpecifier: DI_CORE,
+    namedImports: Array.from(coreImports).sort(),
+  });
+
+  // Group and merge imports from the same file
+  const importsByFile = new Map<string, Set<string>>();
+  state.tokensImports.forEach((names, file) => {
+    if (!importsByFile.has(file)) {
+      importsByFile.set(file, new Set());
+    }
+    names.forEach(name => importsByFile.get(file)!.add(name));
+  });
+
+  importsByFile.forEach((names, file) => {
+    tokensFile.addImportDeclaration({
+      moduleSpecifier: file,
+      namedImports: Array.from(names).sort(),
+    });
+  });
 
   // Topological sort
   const sortedTokens: string[] = [];

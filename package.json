@@ -1,6 +1,6 @@
 {
   "name": "@fioc/codegen",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Automatic DI token and container generator for FIoC",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm test --run",
-    "release": "pnpm run build && pnpm test --run && pnpm publish --access public"
+    "release": "pnpm run build && pnpm publish --access public --no-git-checks"
   },
   "keywords": [
     "dependency-injection",
@@ -48,5 +48,8 @@
   "files": [
     "dist",
     "README.md"
-  ]
+  ],
+  "dependencies": {
+    "@fioc/core": "^1.7.0"
+  }
 }

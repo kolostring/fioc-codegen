@@ -20,11 +20,14 @@ export function generateFactories(
     namedImports: ["withDependencies", "createFactoryDIToken", "constructorToFactory"],
   });
 
-  // Import all tokens
+  // Import and re-export all tokens
   factoriesFile.addImportDeclaration({
     moduleSpecifier: tokensRelPath,
     namespaceImport: "Tokens",
   });
+  
+  // Re-export tokens so containers can access them via Factories.Tokens
+  // Note: addExportDeclaration doesn't work well for namespace re-exports, so we add it at the end
 
   state.factoriesImports.forEach((names, file) => {
     factoriesFile.addImportDeclaration({
@@ -54,15 +57,20 @@ export function generateFactories(
     });
 
     // Generate factory token
-    const hasMetadata = factory.metadata.implements.length > 0 || factory.metadata.generics.length > 0;
+    const hasMetadata = factory.metadata && (factory.metadata.implements.length > 0 || factory.metadata.generics.length > 0);
     
     if (hasMetadata) {
       const metaParts: string[] = [];
-      if (factory.metadata.implements.length > 0) {
-        metaParts.push(`implements: [${factory.metadata.implements.map(t => `Tokens.${t}`).join(", ")}]`);
+      if (factory.metadata!.implements.length > 0) {
+        // Convert interface names to token names
+        const implementsTokens = factory.metadata!.implements.map(interfaceName => {
+          const tokenName = state.tokens.get(interfaceName);
+          return tokenName ? `Tokens.${tokenName}` : `Tokens.${interfaceName}`;
+        });
+        metaParts.push(`implements: [${implementsTokens.join(", ")}]`);
       }
-      if (factory.metadata.generics.length > 0) {
-        metaParts.push(`generics: [${factory.metadata.generics.map(t => `Tokens.${t}`).join(", ")}]`);
+      if (factory.metadata!.generics.length > 0) {
+        metaParts.push(`generics: [${factory.metadata!.generics.map(t => `Tokens.${t}`).join(", ")}]`);
       }
 
       factoriesFile.addVariableStatement({
@@ -80,7 +88,7 @@ export function generateFactories(
       console.log(`    → ${factory.name}Token (with metadata)`);
     } else {
       // Check if return type has a token
-      const returnToken = state.tokens.get(factory.returnTypeName);
+      const returnToken = state.tokens.get(factory.returnType);
       if (returnToken) {
         console.log(`  ✓ ${factory.name}Factory`);
         console.log(`    → registers with Tokens.${returnToken} (direct)`);
@@ -100,4 +108,9 @@ export function generateFactories(
       }
     }
   }
+
+  // Re-export Tokens namespace - must be added as a statement, not export declaration
+  // because we're re-exporting an already imported namespace
+  const lastStatement = factoriesFile.getStatements()[factoriesFile.getStatements().length - 1];
+  lastStatement.replaceWithText(lastStatement.getText() + '\n\nexport { Tokens };');
 }

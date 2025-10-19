@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@fioc/core':
+        specifier: ^1.7.0
+        version: 1.7.0
       ts-morph:
         specifier: ^27.0.0
         version: 27.0.2
@@ -350,6 +353,9 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fioc/core@1.7.0':
+    resolution: {integrity: sha512-Nq+8ZHfdW7/ipEHzd15NigQIYtyENLrRT6Cyl2u1a8GH5YwJSRr65698f9i/U3qYdpV9vO72V12JFm58uOiBNQ==}
 
   '@isaacs/balanced-match@4.0.1':
     resolution: {integrity: sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ==}
@@ -709,6 +715,9 @@ packages:
 
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
+
+  immer@10.1.3:
+    resolution: {integrity: sha512-tmjF/k8QDKydUlm3mZU+tjM6zeq9/fFpPqH9SzWmBnVVKsPBg/V66qsMwb3/Bo90cgUN+ghdVBess+hPsxUyRw==}
 
   is-fullwidth-code-point@3.0.0:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==}
@@ -1279,6 +1288,10 @@ snapshots:
   '@esbuild/win32-x64@0.25.11':
     optional: true
 
+  '@fioc/core@1.7.0':
+    dependencies:
+      immer: 10.1.3
+
   '@isaacs/balanced-match@4.0.1': {}
 
   '@isaacs/brace-expansion@5.0.0':
@@ -1634,6 +1647,8 @@ snapshots:
   has-flag@4.0.0: {}
 
   html-escaper@2.0.2: {}
+
+  immer@10.1.3: {}
 
   is-fullwidth-code-point@3.0.0: {}
 

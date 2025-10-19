@@ -51,7 +51,7 @@ export function getModuleName(node: Node): string {
 
 export function hasTagOnVar(node: Node, tag: string): boolean {
   const parent = node.getParent();
-  return hasTag(parent, tag);
+  return parent ? hasTag(parent, tag) : false;
 }
 
 export function getModuleNameOnVar(v: VariableDeclaration): string {
@@ -146,12 +146,18 @@ export function ensureToken(state: GeneratorState, type: Type, context: string =
   if (!tokenName) {
     tokenName = `${name}Token`;
     state.tokens.set(name, tokenName);
+  }
 
-    // Add import for this type to tokens file
-    const decl = type.getSymbol()?.getDeclarations()?.[0];
-    if (decl) {
-      const file = decl.getSourceFile().getFilePath();
-      addTokenImport(state, getRelativePathFromTokens(file), name);
+  // Always ensure import is added (even if token already exists)
+  const symbol = type.getSymbol() || type.getAliasSymbol();
+  const decl = symbol?.getDeclarations()?.[0];
+  
+  if (decl) {
+    const file = decl.getSourceFile().getFilePath();
+    const relativePath = getRelativePathFromTokens(file);
+    // Only add import if it's not from node_modules
+    if (!file.includes('node_modules')) {
+      addTokenImport(state, relativePath, name);
     }
   }
 
@@ -161,6 +167,21 @@ export function ensureToken(state: GeneratorState, type: Type, context: string =
 export function extractMetadata(state: GeneratorState, type: Type): { implements: string[]; generics: string[] } {
   const implementsTokens: string[] = [];
   const genericsTokens: string[] = [];
+
+  // First, check if this type itself has generics (e.g., INotificationHandler<T, R>)
+  const typeName = getTypeName(type);
+  const typeToken = state.tokens.get(typeName);
+  
+  if (typeToken) {
+    implementsTokens.push(typeToken);
+    
+    // Extract generic arguments from the type
+    const typeArgs = type.getTypeArguments();
+    typeArgs.forEach((arg) => {
+      const genericToken = ensureToken(state, arg, `${typeName} generic`);
+      if (genericToken) genericsTokens.push(genericToken);
+    });
+  }
 
   // Get all base types (interfaces/classes this type extends/implements)
   const baseTypes = type.getBaseTypes();
@@ -187,14 +208,31 @@ export function extractMetadata(state: GeneratorState, type: Type): { implements
   if (symbol) {
     const decls = symbol.getDeclarations();
     for (const decl of decls) {
-      if (Node.isClassDeclaration(decl) || Node.isFunctionDeclaration(decl)) {
-        const returnType = decl.getType();
-        const callSigs = returnType.getCallSignatures();
+      if (Node.isClassDeclaration(decl) || Node.isFunctionDeclaration(decl) || Node.isVariableDeclaration(decl)) {
+        const declType = decl.getType();
+        const callSigs = declType.getCallSignatures();
+
+
         
         if (callSigs.length > 0) {
           const retType = callSigs[0].getReturnType();
           
-          // Check return type's base types
+          // First check if the return type itself has a token (e.g., INotificationHandler<T, R>)
+          const retTypeName = getTypeName(retType);
+          const retTypeToken = state.tokens.get(retTypeName);
+          
+          if (retTypeToken && !implementsTokens.includes(retTypeToken)) {
+            implementsTokens.push(retTypeToken);
+            
+            // Extract generics from the return type itself
+            const retTypeArgs = retType.getTypeArguments();
+            retTypeArgs.forEach((arg) => {
+              const genericToken = ensureToken(state, arg, `${retTypeName} generic`);
+              if (genericToken) genericsTokens.push(genericToken);
+            });
+          }
+          
+          // Also check return type's base types
           const retBaseTypes = retType.getBaseTypes();
           for (const retBaseType of retBaseTypes) {
             const retBaseTypeName = getTypeName(retBaseType);

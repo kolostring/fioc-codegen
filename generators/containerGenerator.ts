@@ -57,8 +57,8 @@ export function generateContainers(
     console.log(`\n  Module: ${moduleName}`);
     
     for (const factory of factories) {
-      const hasMetadata = factory.metadata.implements.length > 0 || factory.metadata.generics.length > 0;
-      const returnToken = state.tokens.get(factory.returnTypeName);
+      const hasMetadata = factory.metadata && (factory.metadata.implements.length > 0 || factory.metadata.generics.length > 0);
+      const returnToken = state.tokens.get(factory.returnType);
 
       if (hasMetadata || !returnToken) {
         // Register with factory token

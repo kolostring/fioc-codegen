@@ -1,7 +1,7 @@
 import { Project } from "ts-morph";
 import * as fs from "fs";
 import * as path from "path";
-import { SRC_DIR, IOC_DIR, TOKENS_FILE, FACTORIES_FILE, CONTAINERS_DIR } from "./config.js";
+import { SRC_DIR, IOC_DIR, TOKENS_FILE, FACTORIES_FILE, CONTAINERS_DIR, DI_CORE } from "./config.js";
 import { GeneratorState } from "./types.js";
 import { collectTokens, autoDetectTokens } from "./collectors/tokenCollector.js";
 import { collectFactories } from "./collectors/factoryCollector.js";
@@ -14,7 +14,8 @@ import { generateContainers } from "./generators/containerGenerator.js";
 // ═══════════════════════════════════════════════════════════════════
 
 export function run() {
-  console.log("\n🔍 Scanning codebase for @Service, @MultiService, and @Injectable...\n");
+  console.log("\n🚀 Running LOCAL @fioc/codegen v0.1.0-local-dev");
+  console.log("🔍 Scanning codebase for @Service, @MultiService, and @Injectable...\n");
 
   // Initialize state
   const state: GeneratorState = {

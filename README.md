@@ -4,7 +4,7 @@ Automatic DI token and container generator for [FIoC](https://github.com/leonard
 
 ## Features
 
-✅ **Automatic Token Generation** - Scans `@Token` annotations and generates type-safe DI tokens  
+✅ **Automatic Token Generation** - Scans `@Service` annotations and generates type-safe DI tokens  
 ✅ **Factory Auto-Detection** - Finds `@Injectable` functions/classes and creates factories  
 ✅ **Multi-Container Support** - Use `@Module` to generate separate containers  
 ✅ **Interface Metadata** - Auto-detects interface implementations and generics  
@@ -24,13 +24,6 @@ npm install --save-dev @fioc/token-generator ts-morph
 ```bash
 # Run in your project root
 npx fioc-generate
-
-# Or add to package.json scripts
-{
-  "scripts": {
-    "generate:tokens": "fioc-generate"
-  }
-}
 ```
 
 ### Programmatic
@@ -91,8 +84,6 @@ export const LoggingPluginToken = createDIToken<IPlugin>().as("LoggingPlugin", {
   implements: [IPluginToken]
 });
 ```
-
-> **Note:** `@Token` is still supported for backward compatibility.
 
 ### `@Injectable` - Mark factories for auto-registration
 
@@ -170,12 +161,12 @@ export function BackendService(): IBackendService {
 ### Interface Extensions
 
 ```typescript
-/** @Token */
+/** @Service */
 export interface INotification<T> {
   payload: T;
 }
 
-// Auto-detected! No @Token needed
+// Auto-detected! No @Service needed
 export interface UserCreatedNotification extends INotification<UserPayload> {}
 ```
 
@@ -191,7 +182,7 @@ export const UserCreatedNotificationToken = createDIToken<UserCreatedNotificatio
 ### Type Aliases
 
 ```typescript
-/** @Token */
+/** @Service */
 export interface IHandler<T> {
   handle(data: T): void;
 }
@@ -238,7 +229,7 @@ export const DEFAULT_MODULE = "default";
 
 ```typescript
 // IUserRepository.ts
-/** @Token */
+/** @Service */
 export interface IUserRepository {
   findAll(): Promise<User[]>;
 }

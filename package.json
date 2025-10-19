@@ -1,6 +1,6 @@
 {
   "name": "@fioc/codegen",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Automatic DI token and container generator for FIoC",
   "type": "module",
   "main": "./dist/index.js",

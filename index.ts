@@ -14,7 +14,7 @@ import { generateContainers } from "./generators/containerGenerator.js";
 // ═══════════════════════════════════════════════════════════════════
 
 export function run() {
-  console.log("\n🚀 Running LOCAL @fioc/codegen v0.1.0-local-dev");
+  console.log("\n🚀 Running @fioc/codegen");
   console.log("🔍 Scanning codebase for @Service, @MultiService, and @Injectable...\n");
 
   // Initialize state
